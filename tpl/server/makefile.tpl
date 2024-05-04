@@ -4,7 +4,7 @@ build-linux:
 
 .PHONY: build-darwin
 build-darwin:
-	CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o ./bin/<xpfo{ .ProjectName }xpfo> .
+	CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-s -w" -o ./bin/<xpfo{ .ProjectName }xpfo> .
 
 .PHONY: build-windows
 build-windows:
