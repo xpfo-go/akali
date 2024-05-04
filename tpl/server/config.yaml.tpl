@@ -1,13 +1,15 @@
 server:
-  app_name: {{ .ProjectName }}
+  app_name: <xpfo{ .ProjectName }xpfo>
   host: 0.0.0.0
   port: 17878
   is_debug: true
 
 log:
+  file_name: log
   level: debug
+  max_age: 21
 
-database:
+mysql:
     host: 127.0.0.1
     port: 3306
     user: root

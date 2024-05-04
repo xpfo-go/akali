@@ -21,9 +21,8 @@ akali create [ProjectName]
 ├── bin
 ├── cmd
 │   ├── admin.go
-│   └── init.go
-├── config
-│   └── config.go
+│   ├── init.go
+│   └── version.go
 ├── docs
 │   ├── docs.go
 │   ├── swagger.json
@@ -33,6 +32,8 @@ akali create [ProjectName]
 │   │   ├── basic
 │   │   ├   └── router.go
 │   │   └── router.go
+├   ├── config
+│   │   └── config.go
 │   ├── controller
 │   │   └── basic
 │   │       ├── basic.go
@@ -41,23 +42,29 @@ akali create [ProjectName]
 │   │   ├── dao
 │   │   ├── do
 │   │   ├── entity
+│   │   ├── dbmock.go
 │   │   ├── init.go
-│   │   └── mysql.go
+│   │   ├── mysql.go
+│   │   ├── sqlx.go
+│   │   ├── sqlx_helper.go
+│   │   ├── sqlx_helper_test.go
+│   │   ├── sqlx_test.go
+│   │   └── utils.go
+│   ├── middleware
+│   │   └── request_id.go
+│   │── server
+│   │   ├── router.go
+│   │   └── server.go
+│   │── service
+│   │── task
+│   │── util
+│   │   ├── consts.go
+│   │   ├── request.go
+│   │   ├── slice.go
+│   │   ├── string.go
+│   │   └── uuid.go
 │   └── version
 │       └── version.go
-├── pkg
-│   ├── limiter
-│   │   ├── dcs_leaky_bucket.go
-│   │   ├── dcs_token_bucket.go
-│   │   ├── leaky_bucket.go
-│   │   └── token_bucket.go
-│   ├── logs
-│   │   └── logs.go
-│   ├── retry
-│   │   └── retry.go
-│   └── server
-│       ├── router.go
-│       └── server.go
 ├── config.yaml
 ├── main.go
 ├── makefile
