@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -24,6 +25,33 @@ var runGoModTidy = func(projectName string) error {
 	return nil
 }
 
+var modulePathPattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._/-]*$`)
+var goVersionPattern = regexp.MustCompile(`^\d+\.\d+(\.\d+)?$`)
+
+func validateModulePath(modulePath string) error {
+	if strings.TrimSpace(modulePath) == "" {
+		return fmt.Errorf("module path cannot be empty")
+	}
+	if strings.Contains(modulePath, " ") {
+		return fmt.Errorf("module path cannot contain spaces: %s", modulePath)
+	}
+	if !modulePathPattern.MatchString(modulePath) {
+		return fmt.Errorf("invalid module path: %s", modulePath)
+	}
+	return nil
+}
+
+func resolveGoVersion(flagValue string) (string, error) {
+	flagValue = strings.TrimSpace(flagValue)
+	if flagValue == "" {
+		return system.GetSystemGoVersion()
+	}
+	if !goVersionPattern.MatchString(flagValue) {
+		return "", fmt.Errorf("invalid go version: %s", flagValue)
+	}
+	return flagValue, nil
+}
+
 func create(cmd *cobra.Command, args []string) error {
 	projectName := args[0]
 	if strings.TrimSpace(projectName) == "" {
@@ -35,13 +63,35 @@ func create(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to access target path %s: %w", projectName, err)
 	}
 
-	goVersion, err := system.GetSystemGoVersion()
+	modulePath, err := cmd.Flags().GetString("module")
+	if err != nil {
+		return err
+	}
+	modulePath = strings.TrimSpace(modulePath)
+	if modulePath == "" {
+		modulePath = projectName
+	}
+	if err := validateModulePath(modulePath); err != nil {
+		return err
+	}
+
+	goVersionFlag, err := cmd.Flags().GetString("go")
+	if err != nil {
+		return err
+	}
+	goVersion, err := resolveGoVersion(goVersionFlag)
+	if err != nil {
+		return err
+	}
+
+	skipTidy, err := cmd.Flags().GetBool("skip-tidy")
 	if err != nil {
 		return err
 	}
 
 	projectData := &Create{
 		ProjectName: projectName,
+		ModulePath:  modulePath,
 		GoVersion:   goVersion,
 	}
 
@@ -52,8 +102,10 @@ func create(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to generate project template: %w", err)
 	}
 
-	if err := runGoModTidy(projectName); err != nil {
-		return err
+	if !skipTidy {
+		if err := runGoModTidy(projectName); err != nil {
+			return err
+		}
 	}
 	return nil
 }

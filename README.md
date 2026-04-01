@@ -27,6 +27,19 @@ akali version
 akali --version
 ```
 
+Create command flags:
+
+```bash
+akali create demo-service \
+  --module github.com/your-org/demo-service \
+  --go 1.22 \
+  --skip-tidy
+```
+
+- `--module`: set generated `go.mod` module path (default: project name)
+- `--go`: set generated Go version (default: local `go version`)
+- `--skip-tidy`: skip `go mod tidy` after scaffold generation
+
 ## Development
 
 Run checks locally:

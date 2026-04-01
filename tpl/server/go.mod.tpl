@@ -1,4 +1,4 @@
-module <xpfo{ .ProjectName }xpfo>
+module <xpfo{ .ModulePath }xpfo>
 
 go <xpfo{ .GoVersion }xpfo>
 

@@ -12,8 +12,9 @@ func TestGenServerTemplateFS(t *testing.T) {
 		BasePath: base,
 		TplData: struct {
 			ProjectName string
+			ModulePath  string
 			GoVersion   string
-		}{ProjectName: "akali_gen_test", GoVersion: "1.21"},
+		}{ProjectName: "akali_gen_test", ModulePath: "akali_gen_test", GoVersion: "1.21"},
 	})
 	if err != nil {
 		t.Fatalf("GenServerTemplateFS() error = %v", err)
@@ -36,8 +37,9 @@ func TestGenServerTemplateFS_ReturnsErrorWhenTargetExists(t *testing.T) {
 		BasePath: base,
 		TplData: struct {
 			ProjectName string
+			ModulePath  string
 			GoVersion   string
-		}{ProjectName: "akali_gen_test", GoVersion: "1.21"},
+		}{ProjectName: "akali_gen_test", ModulePath: "akali_gen_test", GoVersion: "1.21"},
 	}
 	if err := GenServerTemplateFS(data); err != nil {
 		t.Fatalf("first generation failed: %v", err)
