@@ -1,4 +1,4 @@
-module github.com/xfpo-go/akali
+module github.com/xpfo-go/akali
 
 go 1.21
 

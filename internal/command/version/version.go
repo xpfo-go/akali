@@ -3,8 +3,8 @@ package version
 import "runtime"
 
 var (
-	Version   = "1.0.1"
+	Version   = "dev"
 	Commit    = "none"
-	BuildTime = "2024-05-04 18:39:00"
+	BuildTime = "unknown"
 	GoVersion = runtime.Version()
 )

@@ -19,3 +19,14 @@
 
 # Go workspace file
 go.work
+
+# IDE / local workspace
+.idea/
+
+# local worktrees
+.worktrees/
+worktrees/
+
+# local build outputs
+bin/
+dist/

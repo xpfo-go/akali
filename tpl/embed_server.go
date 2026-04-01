@@ -2,11 +2,13 @@ package tpl
 
 import (
 	"embed"
-	"github.com/xfpo-go/akali/internal/pkg/system"
+	"fmt"
 	"io/fs"
 	"path"
 	"strings"
 	"text/template"
+
+	"github.com/xpfo-go/akali/internal/pkg/system"
 )
 
 //go:embed server
@@ -31,28 +33,36 @@ func GenServerTemplateFS(data ServerTemplateFSData) error {
 		return err
 	}
 
-	recursionServerTemplateFS(serverTemplateName, fileList, data)
-	return nil
+	return recursionServerTemplateFS(serverTemplateName, fileList, data)
 }
 
-func recursionServerTemplateFS(prefixPath string, fs []fs.DirEntry, data ServerTemplateFSData) {
+func recursionServerTemplateFS(prefixPath string, fs []fs.DirEntry, data ServerTemplateFSData) error {
 	if len(fs) == 0 {
-		return
+		return nil
 	}
 
 	for i := range fs {
 		if fs[i].IsDir() {
-			tfs, _ := ServerTemplateFS.ReadDir(path.Join(prefixPath, fs[i].Name()))
-			recursionServerTemplateFS(path.Join(prefixPath, fs[i].Name()), tfs, data)
+			nextPath := path.Join(prefixPath, fs[i].Name())
+			tfs, err := ServerTemplateFS.ReadDir(nextPath)
+			if err != nil {
+				return err
+			}
+			if err := recursionServerTemplateFS(nextPath, tfs, data); err != nil {
+				return err
+			}
 		} else {
-			genServerTemplateFSFile(prefixPath, fs[i], data)
+			if err := genServerTemplateFSFile(prefixPath, fs[i], data); err != nil {
+				return err
+			}
 		}
 	}
+	return nil
 }
 
-func genServerTemplateFSFile(prefixPath string, fs fs.DirEntry, data ServerTemplateFSData) {
+func genServerTemplateFSFile(prefixPath string, fs fs.DirEntry, data ServerTemplateFSData) error {
 	if fs.IsDir() {
-		return
+		return nil
 	}
 
 	// 1.获取tplPath
@@ -70,10 +80,19 @@ func genServerTemplateFSFile(prefixPath string, fs fs.DirEntry, data ServerTempl
 	}
 
 	// 2. 生成文件
-	tplFile, _ := template.New(fs.Name()).Delims(delimitLeft, delimitRight).ParseFS(ServerTemplateFS, tplPath)
-	f := system.CreateFile(filePath, fileName)
+	tplFile, err := template.New(fs.Name()).Delims(delimitLeft, delimitRight).ParseFS(ServerTemplateFS, tplPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse template %s: %w", tplPath, err)
+	}
+	f, err := system.CreateFile(filePath, fileName)
+	if err != nil {
+		return err
+	}
 	defer func() {
 		_ = f.Close()
 	}()
-	_ = tplFile.Execute(f, data.TplData)
+	if err := tplFile.Execute(f, data.TplData); err != nil {
+		return fmt.Errorf("failed to execute template %s: %w", tplPath, err)
+	}
+	return nil
 }

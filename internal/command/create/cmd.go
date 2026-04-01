@@ -7,5 +7,5 @@ var CmdCreate = &cobra.Command{
 	Short:   "Create a new project",
 	Example: "akali create [project-name]",
 	Args:    cobra.ExactArgs(1),
-	Run:     create,
+	RunE:    create,
 }

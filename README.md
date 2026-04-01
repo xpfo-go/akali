@@ -1,78 +1,66 @@
-# akali — A CLI tool for building Go applications.
+# akali
 
-## Features
-- **Gin**: https://github.com/gin-gonic/gin
-- **Sqlx**: https://github.com/jmoiron/sqlx
-- **Zap**: https://github.com/uber-go/zap
-- **Swaggo**:  https://github.com/swaggo/swag
-- More...
+`akali` is a Go CLI scaffold tool for generating backend service projects.
+The generated project includes a practical baseline around Gin, sqlx, Swagger,
+logging, metrics, and common server wiring.
 
-### Create a New Project
-
-You can create a new Go project with the following command:
+## Install
 
 ```bash
-akali create [ProjectName]
+go install github.com/xpfo-go/akali@latest
 ```
 
-## Directory Structure
-```
-.
-├── bin
-├── cmd
-│   ├── admin.go
-│   ├── init.go
-│   └── version.go
-├── docs
-│   ├── docs.go
-│   ├── swagger.json
-│   └── swagger.yaml
-├── internal
-│   ├── api
-│   │   ├── basic
-│   │   ├   └── router.go
-│   │   └── router.go
-├   ├── config
-│   │   └── config.go
-│   ├── controller
-│   │   └── basic
-│   │       ├── basic.go
-│   │       └── health.go
-│   ├── database
-│   │   ├── dao
-│   │   ├── do
-│   │   ├── entity
-│   │   ├── dbmock.go
-│   │   ├── init.go
-│   │   ├── mysql.go
-│   │   ├── sqlx.go
-│   │   ├── sqlx_helper.go
-│   │   ├── sqlx_helper_test.go
-│   │   ├── sqlx_test.go
-│   │   └── utils.go
-│   ├── middleware
-│   │   └── request_id.go
-│   │── server
-│   │   ├── router.go
-│   │   └── server.go
-│   │── service
-│   │── task
-│   │── util
-│   │   ├── consts.go
-│   │   ├── request.go
-│   │   ├── slice.go
-│   │   ├── string.go
-│   │   └── uuid.go
-│   └── version
-│       └── version.go
-├── config.yaml
-├── main.go
-├── makefile
-├── go.mod
-└── go.sum
+## Quick Start
 
+```bash
+akali create demo-service
+cd demo-service
+go test ./...
+go run . --help
 ```
+
+## Commands
+
+```bash
+akali create [project-name]
+akali version
+akali --version
+```
+
+## Development
+
+Run checks locally:
+
+```bash
+go test ./...
+go vet ./...
+go build ./...
+```
+
+Cross-platform builds:
+
+```bash
+make build-all VERSION=v1.0.3
+```
+
+## Generated Project Stack
+
+- Gin
+- sqlx
+- Zap
+- Swagger (swaggo)
+- Prometheus metrics
+
+## CI
+
+This repository uses GitHub Actions to run:
+
+- `go test ./...`
+- `go vet ./...`
+- `go build ./...`
+
+across Linux, macOS, and Windows.
 
 ## License
 
-Akali is released under the MIT License. For more information, see the [LICENSE](LICENSE) file.
+MIT. See [LICENSE](LICENSE).

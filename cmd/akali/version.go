@@ -3,15 +3,15 @@ package akali
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/xfpo-go/akali/internal/command/version"
+	"github.com/xpfo-go/akali/internal/command/version"
 	"strings"
 )
 
 // versionCmd represents the version command
 var versionCmd = &cobra.Command{
 	Use:   "version",
-	Short: "Print the version number of server-tpl",
-	Long:  `All software has versions. This is server-tpl`,
+	Short: "Print build metadata of akali",
+	Long:  `Print detailed build metadata for akali.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		info := []string{
 			"Version: " + version.Version,

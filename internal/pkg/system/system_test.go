@@ -1,39 +1,42 @@
 package system
 
 import (
-	"fmt"
-	"os/exec"
+	"os"
+	"path/filepath"
 	"regexp"
 	"testing"
 )
 
-func TestPwd(t *testing.T) {
-	t.Log(Pwd())
+func TestCreateFolder(t *testing.T) {
+	target := filepath.Join(t.TempDir(), "nested", "dir")
+	if err := CreateFolder(target); err != nil {
+		t.Fatalf("CreateFolder() error = %v", err)
+	}
+	if info, err := os.Stat(target); err != nil || !info.IsDir() {
+		t.Fatalf("CreateFolder() did not create target directory, statErr=%v", err)
+	}
 }
 
-func TestCreateFolder(t *testing.T) {
-	CreateFolder("123")
+func TestCreateFile(t *testing.T) {
+	dir := t.TempDir()
+	file, err := CreateFile(dir, "a.txt")
+	if err != nil {
+		t.Fatalf("CreateFile() unexpected error = %v", err)
+	}
+	_ = file.Close()
+
+	if _, err := CreateFile(dir, "a.txt"); err == nil {
+		t.Fatalf("CreateFile() expected error when file exists")
+	}
 }
 
 func TestGetGoVersion(t *testing.T) {
-	cmd := exec.Command("go", "version")
-	out, err := cmd.Output()
+	version, err := GetSystemGoVersion()
 	if err != nil {
-		fmt.Println(err)
-		return
+		t.Fatalf("GetSystemGoVersion() error = %v", err)
 	}
-
-	// 提取 Go 版本
-	version := string(out)
-	version = "adssadgo1.18.2asdasdasd"
-	// 使用正则表达式匹配 Go 版本号
-	r := regexp.MustCompile(`go(\d+.\d+)`)
-	matches := r.FindStringSubmatch(version)
-	if len(matches) != 2 {
-		fmt.Println("无法提取 Go 版本号")
-		return
+	r := regexp.MustCompile(`^\d+\.\d+`)
+	if !r.MatchString(version) {
+		t.Fatalf("GetSystemGoVersion() invalid version: %q", version)
 	}
-
-	// 输出 Go 版本号
-	fmt.Println(matches[1])
 }

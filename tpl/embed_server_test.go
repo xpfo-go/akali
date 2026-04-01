@@ -1,54 +1,48 @@
 package tpl
 
 import (
-	"github.com/xfpo-go/akali/internal/pkg/system"
-	"io/fs"
-	"path"
+	"os"
+	"path/filepath"
 	"testing"
 )
 
-func TestCreateFile(t *testing.T) {
-	path := "./a/b/c"
-	system.CreateFile(path, "t.txt")
-}
-
-func TestGen(t *testing.T) {
+func TestGenServerTemplateFS(t *testing.T) {
+	base := filepath.Join(t.TempDir(), "akali_gen_test")
 	err := GenServerTemplateFS(ServerTemplateFSData{
-		BasePath: "akali_gen_test",
+		BasePath: base,
 		TplData: struct {
 			ProjectName string
 			GoVersion   string
-		}{ProjectName: "akali_gen_test",
-			GoVersion: system.GetSystemGoVersion()},
+		}{ProjectName: "akali_gen_test", GoVersion: "1.21"},
 	})
 	if err != nil {
-		t.Error(err.Error())
+		t.Fatalf("GenServerTemplateFS() error = %v", err)
+	}
+	expectedFiles := []string{
+		filepath.Join(base, "main.go"),
+		filepath.Join(base, "go.mod"),
+		filepath.Join(base, "internal", "server", "server.go"),
+	}
+	for _, file := range expectedFiles {
+		if _, err := os.Stat(file); err != nil {
+			t.Fatalf("expected generated file %s to exist: %v", file, err)
+		}
 	}
 }
 
-func TestRev(t *testing.T) {
-	fileList, err := ServerTemplateFS.ReadDir("server")
-	if err != nil {
-		t.Log(err.Error())
-		return
+func TestGenServerTemplateFS_ReturnsErrorWhenTargetExists(t *testing.T) {
+	base := filepath.Join(t.TempDir(), "akali_gen_test")
+	data := ServerTemplateFSData{
+		BasePath: base,
+		TplData: struct {
+			ProjectName string
+			GoVersion   string
+		}{ProjectName: "akali_gen_test", GoVersion: "1.21"},
 	}
-
-	var f func(prefixPath string, fs []fs.DirEntry)
-	f = func(prefixPath string, fs []fs.DirEntry) {
-		if len(fs) == 0 {
-			return
-		}
-
-		for i := range fs {
-			if fs[i].IsDir() {
-				println(path.Join(prefixPath, fs[i].Name()))
-				tfs, _ := ServerTemplateFS.ReadDir(path.Join(prefixPath, fs[i].Name()))
-				f(path.Join(prefixPath, fs[i].Name()), tfs)
-			} else {
-				//println(prefixPath, fs[i].Name())
-			}
-		}
+	if err := GenServerTemplateFS(data); err != nil {
+		t.Fatalf("first generation failed: %v", err)
 	}
-	f("server", fileList)
-
+	if err := GenServerTemplateFS(data); err == nil {
+		t.Fatalf("second generation expected error when files already exist")
+	}
 }
