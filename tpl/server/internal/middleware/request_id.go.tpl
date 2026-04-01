@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/xpfo-go/logs"
-	"<xpfo{ .ProjectName }xpfo>/internal/util"
+	"<xpfo{ .ModulePath }xpfo>/internal/util"
 )
 
 // RequestID add the request_id for each api request

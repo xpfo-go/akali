@@ -3,6 +3,12 @@ package create
 const GitKeep = ".gitkeep"
 
 type Create struct {
-	ProjectName string
-	GoVersion   string
+	ProjectName   string
+	ModulePath    string
+	GoVersion     string
+	Profile       string
+	EnableMySQL   bool
+	EnableRedis   bool
+	EnableSwagger bool
+	EnableMetrics bool
 }

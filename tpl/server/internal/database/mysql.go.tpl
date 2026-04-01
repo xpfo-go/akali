@@ -5,7 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/xpfo-go/logs"
 	"net/url"
-	"<xpfo{ .ProjectName }xpfo>/internal/config"
+	"<xpfo{ .ModulePath }xpfo>/internal/config"
 	"time"
 )
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/xpfo-go/logs"
 	"reflect"
-	"<xpfo{ .ProjectName }xpfo>/internal/util"
+	"<xpfo{ .ModulePath }xpfo>/internal/util"
 	"strings"
 	"time"
 

@@ -1,78 +1,96 @@
-# akali — A CLI tool for building Go applications.
+# akali
 
-## Features
-- **Gin**: https://github.com/gin-gonic/gin
-- **Sqlx**: https://github.com/jmoiron/sqlx
-- **Zap**: https://github.com/uber-go/zap
-- **Swaggo**:  https://github.com/swaggo/swag
-- More...
+`akali` is a Go CLI scaffold tool for generating backend service projects with
+production-oriented defaults.
 
-### Create a New Project
-
-You can create a new Go project with the following command:
+## Install
 
 ```bash
-akali create [ProjectName]
+go install github.com/xpfo-go/akali@latest
 ```
 
-## Directory Structure
-```
-.
-├── bin
-├── cmd
-│   ├── admin.go
-│   ├── init.go
-│   └── version.go
-├── docs
-│   ├── docs.go
-│   ├── swagger.json
-│   └── swagger.yaml
-├── internal
-│   ├── api
-│   │   ├── basic
-│   │   ├   └── router.go
-│   │   └── router.go
-├   ├── config
-│   │   └── config.go
-│   ├── controller
-│   │   └── basic
-│   │       ├── basic.go
-│   │       └── health.go
-│   ├── database
-│   │   ├── dao
-│   │   ├── do
-│   │   ├── entity
-│   │   ├── dbmock.go
-│   │   ├── init.go
-│   │   ├── mysql.go
-│   │   ├── sqlx.go
-│   │   ├── sqlx_helper.go
-│   │   ├── sqlx_helper_test.go
-│   │   ├── sqlx_test.go
-│   │   └── utils.go
-│   ├── middleware
-│   │   └── request_id.go
-│   │── server
-│   │   ├── router.go
-│   │   └── server.go
-│   │── service
-│   │── task
-│   │── util
-│   │   ├── consts.go
-│   │   ├── request.go
-│   │   ├── slice.go
-│   │   ├── string.go
-│   │   └── uuid.go
-│   └── version
-│       └── version.go
-├── config.yaml
-├── main.go
-├── makefile
-├── go.mod
-└── go.sum
+## Quick Start
 
+```bash
+akali create demo-service
+cd demo-service
+go test ./...
+go run . --help
 ```
+
+## Create Command
+
+```bash
+akali create [project-name] [flags]
+```
+
+Common usage:
+
+```bash
+akali create order-service \
+  --output ./workspaces \
+  --module github.com/your-org/order-service \
+  --go 1.22 \
+  --profile api
+```
+
+### Profiles
+
+- `minimal`: HTTP baseline only (no MySQL, no Redis, no Swagger, no Metrics)
+- `api`: API-facing defaults (Swagger + Metrics, no MySQL/Redis)
+- `full`: full stack baseline (MySQL + Redis + Swagger + Metrics)
+
+### Flags
+
+- `--module`: set generated `go.mod` module path
+- `--go`: set generated Go version
+- `--profile`: `minimal | api | full`
+- `--with-mysql`: override profile default and enable/disable MySQL
+- `--with-redis`: override profile default and enable/disable Redis
+- `--with-swagger`: override profile default and enable/disable Swagger
+- `--with-metrics`: override profile default and enable/disable Metrics
+- `--output`: output directory for generated project
+- `--force`: overwrite existing target directory
+- `--skip-tidy`: skip `go mod tidy` after generation
+- `--dry-run`: preview generation without writing files
+
+Examples:
+
+```bash
+# preview without writing files
+akali create demo --profile minimal --dry-run
+
+# overwrite an existing target directory
+akali create demo --force --profile full
+
+# custom feature matrix on top of profile
+akali create demo --profile api --with-mysql --with-redis
+```
+
+## Development
+
+```bash
+go test ./...
+go vet ./...
+go build ./...
+make test-e2e
+```
+
+## CI/CD
+
+`akali` uses GitHub Actions for:
+
+- cross-platform verification (`test`, `vet`, `build`) on Linux/macOS/Windows
+- `golangci-lint`
+- `gosec` + `govulncheck`
+- E2E scaffold generation tests
+
+Tag-based release:
+
+- push tag `vX.Y.Z`
+- GitHub Actions runs GoReleaser
+- multi-platform binaries and checksums are published to GitHub Releases
 
 ## License
 
-Akali is released under the MIT License. For more information, see the [LICENSE](LICENSE) file.
+MIT. See [LICENSE](LICENSE).

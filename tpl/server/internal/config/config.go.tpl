@@ -6,6 +6,7 @@ type Config struct {
 	Server ServerConfig `yaml:"server"`
 	Log    LogConfig    `yaml:"log"`
 	Mysql  MysqlConfig  `yaml:"mysql"`
+	Redis  RedisConfig  `yaml:"redis"`
 }
 
 type ServerConfig struct {
@@ -30,4 +31,12 @@ type MysqlConfig struct {
 	MaxOpenConn           int    `yaml:"max_open_conn"`
 	MaxIdleConn           int    `yaml:"max_idle_conn"`
 	ConnMaxLifetimeSecond int    `yaml:"conn_max_lifetime_second"`
+}
+
+type RedisConfig struct {
+	Host     string `yaml:"host"`
+	Port     int    `yaml:"port"`
+	Password string `yaml:"password"`
+	DB       int    `yaml:"db"`
+	PoolSize int    `yaml:"pool_size"`
 }
