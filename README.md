@@ -39,16 +39,20 @@ akali create order-service \
 - `minimal`: HTTP baseline only (no MySQL, no Redis, no Swagger, no Metrics)
 - `api`: API-facing defaults (Swagger + Metrics, no MySQL/Redis)
 - `full`: full stack baseline (MySQL + Redis + Swagger + Metrics)
+- `production`: production-hardened baseline (Auth + Rate Limit + Migration + MySQL + Redis + Metrics, Swagger disabled by default)
 
 ### Flags
 
 - `--module`: set generated `go.mod` module path
 - `--go`: set generated Go version
-- `--profile`: `minimal | api | full`
+- `--profile`: `minimal | api | full | production`
 - `--with-mysql`: override profile default and enable/disable MySQL
 - `--with-redis`: override profile default and enable/disable Redis
 - `--with-swagger`: override profile default and enable/disable Swagger
 - `--with-metrics`: override profile default and enable/disable Metrics
+- `--with-auth`: override profile default and enable/disable JWT auth middleware
+- `--with-rate-limit`: override profile default and enable/disable per-IP rate limiting
+- `--with-migrate`: override profile default and enable/disable migration command/templates
 - `--output`: output directory for generated project
 - `--force`: overwrite existing target directory
 - `--skip-tidy`: skip `go mod tidy` after generation
@@ -65,6 +69,9 @@ akali create demo --force --profile full
 
 # custom feature matrix on top of profile
 akali create demo --profile api --with-mysql --with-redis
+
+# production-hardened scaffold
+akali create demo --profile production
 ```
 
 ## Development

@@ -19,6 +19,9 @@ func TestGenServerTemplateFS(t *testing.T) {
 			EnableRedis   bool
 			EnableSwagger bool
 			EnableMetrics bool
+			EnableAuth    bool
+			EnableRate    bool
+			EnableMigrate bool
 		}{
 			ProjectName:   "akali_gen_test",
 			ModulePath:    "akali_gen_test",
@@ -28,6 +31,9 @@ func TestGenServerTemplateFS(t *testing.T) {
 			EnableRedis:   true,
 			EnableSwagger: true,
 			EnableMetrics: true,
+			EnableAuth:    false,
+			EnableRate:    false,
+			EnableMigrate: false,
 		},
 	})
 	if err != nil {
@@ -58,6 +64,9 @@ func TestGenServerTemplateFS_ReturnsErrorWhenTargetExists(t *testing.T) {
 			EnableRedis   bool
 			EnableSwagger bool
 			EnableMetrics bool
+			EnableAuth    bool
+			EnableRate    bool
+			EnableMigrate bool
 		}{
 			ProjectName:   "akali_gen_test",
 			ModulePath:    "akali_gen_test",
@@ -67,6 +76,9 @@ func TestGenServerTemplateFS_ReturnsErrorWhenTargetExists(t *testing.T) {
 			EnableRedis:   true,
 			EnableSwagger: true,
 			EnableMetrics: true,
+			EnableAuth:    false,
+			EnableRate:    false,
+			EnableMigrate: false,
 		},
 	}
 	if err := GenServerTemplateFS(data); err != nil {

@@ -97,3 +97,32 @@ func TestCreateDryRunE2E(t *testing.T) {
 		t.Fatalf("dry-run should not create any scaffold files")
 	}
 }
+
+func TestCreateProductionProfileE2E(t *testing.T) {
+	root := repoRoot(t)
+	outDir := t.TempDir()
+
+	runCmd(t, root, "go", "run", ".", "create", "prodsvc",
+		"--output", outDir,
+		"--profile", "production",
+		"--skip-tidy",
+	)
+
+	generated := filepath.Join(outDir, "prodsvc")
+	if _, err := os.Stat(filepath.Join(generated, "cmd", "migrate.go")); err != nil {
+		t.Fatalf("production profile should generate cmd/migrate.go: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(generated, "internal", "middleware", "auth.go")); err != nil {
+		t.Fatalf("production profile should generate auth middleware: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(generated, "migrations", "000001_init.up.sql")); err != nil {
+		t.Fatalf("production profile should generate migration SQL: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(generated, "docs")); !os.IsNotExist(err) {
+		t.Fatalf("production profile should disable swagger docs by default")
+	}
+
+	runCmd(t, generated, "go", "mod", "tidy")
+	runCmd(t, generated, "go", "test", "./...")
+	runCmd(t, generated, "go", "build", "./...")
+}

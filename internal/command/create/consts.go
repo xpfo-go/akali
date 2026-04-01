@@ -11,4 +11,7 @@ type Create struct {
 	EnableRedis   bool
 	EnableSwagger bool
 	EnableMetrics bool
+	EnableAuth    bool
+	EnableRate    bool
+	EnableMigrate bool
 }

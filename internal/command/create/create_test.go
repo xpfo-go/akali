@@ -307,3 +307,80 @@ func TestCreateCommandProfileMinimalDisablesSwaggerAndMetrics(t *testing.T) {
 		t.Fatalf("minimal profile go.mod should not include swagger/metrics/mysql deps: %s", mod)
 	}
 }
+
+func TestCreateCommandProfileProductionEnablesHardeningModules(t *testing.T) {
+	resetCreateCommandFlags()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("os.Getwd() error = %v", err)
+	}
+	tmp := t.TempDir()
+	if err := os.Chdir(tmp); err != nil {
+		t.Fatalf("os.Chdir() error = %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(wd) })
+
+	root := &cobra.Command{Use: "akali"}
+	root.SilenceErrors = true
+	root.SilenceUsage = true
+	root.SetOut(io.Discard)
+	root.SetErr(io.Discard)
+	root.AddCommand(CmdCreate)
+	root.SetArgs([]string{"create", "demo", "--profile", "production", "--skip-tidy"})
+
+	if err := root.Execute(); err != nil {
+		t.Fatalf("root.Execute() error = %v", err)
+	}
+
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "cmd", "migrate.go")); err != nil {
+		t.Fatalf("production profile should generate migrate command: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "internal", "middleware", "auth.go")); err != nil {
+		t.Fatalf("production profile should generate auth middleware: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "internal", "middleware", "rate_limit.go")); err != nil {
+		t.Fatalf("production profile should generate rate limit middleware: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "migrations", "000001_init.up.sql")); err != nil {
+		t.Fatalf("production profile should generate migration file: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "docs")); !os.IsNotExist(err) {
+		t.Fatalf("production profile should disable swagger docs by default")
+	}
+
+	goModContent, err := os.ReadFile(filepath.Join(tmp, "demo", "go.mod"))
+	if err != nil {
+		t.Fatalf("os.ReadFile(go.mod) error = %v", err)
+	}
+	mod := string(goModContent)
+	if !strings.Contains(mod, "github.com/golang-jwt/jwt/v5") ||
+		!strings.Contains(mod, "github.com/golang-migrate/migrate/v4") ||
+		!strings.Contains(mod, "golang.org/x/time") {
+		t.Fatalf("production profile go.mod missing hardening deps: %s", mod)
+	}
+}
+
+func TestCreateCommandRejectsMigrationWithoutMySQL(t *testing.T) {
+	resetCreateCommandFlags()
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("os.Getwd() error = %v", err)
+	}
+	tmp := t.TempDir()
+	if err := os.Chdir(tmp); err != nil {
+		t.Fatalf("os.Chdir() error = %v", err)
+	}
+	t.Cleanup(func() { _ = os.Chdir(wd) })
+
+	root := &cobra.Command{Use: "akali"}
+	root.SilenceErrors = true
+	root.SilenceUsage = true
+	root.SetOut(io.Discard)
+	root.SetErr(io.Discard)
+	root.AddCommand(CmdCreate)
+	root.SetArgs([]string{"create", "demo", "--profile", "production", "--with-mysql=false"})
+
+	if err := root.Execute(); err == nil {
+		t.Fatalf("expected error when migration is enabled without mysql")
+	}
+}

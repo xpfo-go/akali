@@ -3,6 +3,8 @@ server:
   host: 0.0.0.0
   port: 17878
   is_debug: true
+  pprof_username: admin
+  pprof_password: admin
 
 log:
   file_name: log
@@ -27,3 +29,12 @@ redis:
     db: 0
     pool_size: 20
 <xpfo{ end }xpfo>
+
+auth:
+    enabled: <xpfo{ .EnableAuth }xpfo>
+    jwt_secret: "please-change-me"
+
+rate_limit:
+    enabled: <xpfo{ .EnableRate }xpfo>
+    rps: 50
+    burst: 100

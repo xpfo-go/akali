@@ -19,8 +19,12 @@ func NewBasicRouter(cfg *config.Config) *gin.Engine {
 
 	router := gin.New()
 	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
 	// MW: request_id
 	router.Use(middleware.RequestID())
+<xpfo{ if .EnableRate }xpfo>
+	router.Use(middleware.RateLimit(cfg))
+<xpfo{ end }xpfo>
 
 	return router
 }

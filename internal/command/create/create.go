@@ -44,6 +44,9 @@ type scaffoldOptions struct {
 	enableRedis   bool
 	enableSwagger bool
 	enableMetrics bool
+	enableAuth    bool
+	enableRate    bool
+	enableMigrate bool
 }
 
 func resolveFeatureEnabled(cmd *cobra.Command, flagName string, profileDefault bool) (bool, error) {
@@ -53,16 +56,40 @@ func resolveFeatureEnabled(cmd *cobra.Command, flagName string, profileDefault b
 	return cmd.Flags().GetBool(flagName)
 }
 
-func resolveProfileDefaults(profile string) (enableMySQL, enableRedis, enableSwagger, enableMetrics bool, err error) {
+type profileDefaults struct {
+	enableMySQL   bool
+	enableRedis   bool
+	enableSwagger bool
+	enableMetrics bool
+	enableAuth    bool
+	enableRate    bool
+	enableMigrate bool
+}
+
+func resolveProfileDefaults(profile string) (*profileDefaults, error) {
 	switch profile {
 	case "minimal":
-		return false, false, false, false, nil
+		return &profileDefaults{
+			enableMySQL: false, enableRedis: false, enableSwagger: false, enableMetrics: false,
+			enableAuth: false, enableRate: false, enableMigrate: false,
+		}, nil
 	case "api":
-		return false, false, true, true, nil
+		return &profileDefaults{
+			enableMySQL: false, enableRedis: false, enableSwagger: true, enableMetrics: true,
+			enableAuth: false, enableRate: false, enableMigrate: false,
+		}, nil
 	case "full":
-		return true, true, true, true, nil
+		return &profileDefaults{
+			enableMySQL: true, enableRedis: true, enableSwagger: true, enableMetrics: true,
+			enableAuth: false, enableRate: false, enableMigrate: false,
+		}, nil
+	case "production":
+		return &profileDefaults{
+			enableMySQL: true, enableRedis: true, enableSwagger: false, enableMetrics: true,
+			enableAuth: true, enableRate: true, enableMigrate: true,
+		}, nil
 	default:
-		return false, false, false, false, fmt.Errorf("invalid profile %q: allowed values are minimal, api, full", profile)
+		return nil, fmt.Errorf("invalid profile %q: allowed values are minimal, api, full, production", profile)
 	}
 }
 
@@ -147,25 +174,40 @@ func resolveScaffoldOptions(cmd *cobra.Command, args []string) (*scaffoldOptions
 		return nil, err
 	}
 	profile = strings.ToLower(strings.TrimSpace(profile))
-	enableMySQLDefault, enableRedisDefault, enableSwaggerDefault, enableMetricsDefault, err := resolveProfileDefaults(profile)
+	defaults, err := resolveProfileDefaults(profile)
 	if err != nil {
 		return nil, err
 	}
-	enableMySQL, err := resolveFeatureEnabled(cmd, "with-mysql", enableMySQLDefault)
+	enableMySQL, err := resolveFeatureEnabled(cmd, "with-mysql", defaults.enableMySQL)
 	if err != nil {
 		return nil, err
 	}
-	enableRedis, err := resolveFeatureEnabled(cmd, "with-redis", enableRedisDefault)
+	enableRedis, err := resolveFeatureEnabled(cmd, "with-redis", defaults.enableRedis)
 	if err != nil {
 		return nil, err
 	}
-	enableSwagger, err := resolveFeatureEnabled(cmd, "with-swagger", enableSwaggerDefault)
+	enableSwagger, err := resolveFeatureEnabled(cmd, "with-swagger", defaults.enableSwagger)
 	if err != nil {
 		return nil, err
 	}
-	enableMetrics, err := resolveFeatureEnabled(cmd, "with-metrics", enableMetricsDefault)
+	enableMetrics, err := resolveFeatureEnabled(cmd, "with-metrics", defaults.enableMetrics)
 	if err != nil {
 		return nil, err
+	}
+	enableAuth, err := resolveFeatureEnabled(cmd, "with-auth", defaults.enableAuth)
+	if err != nil {
+		return nil, err
+	}
+	enableRate, err := resolveFeatureEnabled(cmd, "with-rate-limit", defaults.enableRate)
+	if err != nil {
+		return nil, err
+	}
+	enableMigrate, err := resolveFeatureEnabled(cmd, "with-migrate", defaults.enableMigrate)
+	if err != nil {
+		return nil, err
+	}
+	if enableMigrate && !enableMySQL {
+		return nil, fmt.Errorf("migration requires mysql support: enable --with-mysql or disable --with-migrate")
 	}
 
 	dryRun, err := cmd.Flags().GetBool("dry-run")
@@ -190,6 +232,9 @@ func resolveScaffoldOptions(cmd *cobra.Command, args []string) (*scaffoldOptions
 		enableRedis:   enableRedis,
 		enableSwagger: enableSwagger,
 		enableMetrics: enableMetrics,
+		enableAuth:    enableAuth,
+		enableRate:    enableRate,
+		enableMigrate: enableMigrate,
 	}, nil
 }
 
@@ -219,6 +264,9 @@ func create(cmd *cobra.Command, args []string) error {
 		EnableRedis:   options.enableRedis,
 		EnableSwagger: options.enableSwagger,
 		EnableMetrics: options.enableMetrics,
+		EnableAuth:    options.enableAuth,
+		EnableRate:    options.enableRate,
+		EnableMigrate: options.enableMigrate,
 	}
 
 	skipPaths := []string{
@@ -233,6 +281,15 @@ func create(cmd *cobra.Command, args []string) error {
 	if !options.enableRedis {
 		skipPaths = append(skipPaths, "server/internal/cache")
 	}
+	if !options.enableAuth {
+		skipPaths = append(skipPaths, "server/internal/api/secure", "server/internal/controller/secure", "server/internal/middleware/auth.go.tpl")
+	}
+	if !options.enableRate {
+		skipPaths = append(skipPaths, "server/internal/middleware/rate_limit.go.tpl")
+	}
+	if !options.enableMigrate {
+		skipPaths = append(skipPaths, "server/cmd/migrate.go.tpl", "server/migrations")
+	}
 
 	if err := tpl.GenServerTemplateFS(tpl.ServerTemplateFSData{
 		BasePath:  options.targetPath,
@@ -245,13 +302,16 @@ func create(cmd *cobra.Command, args []string) error {
 
 	if options.dryRun {
 		cmd.Printf(
-			"dry-run: scaffold=%s profile=%s mysql=%t redis=%t swagger=%t metrics=%t\n",
+			"dry-run: scaffold=%s profile=%s mysql=%t redis=%t swagger=%t metrics=%t auth=%t rate_limit=%t migrate=%t\n",
 			options.targetPath,
 			options.profile,
 			options.enableMySQL,
 			options.enableRedis,
 			options.enableSwagger,
 			options.enableMetrics,
+			options.enableAuth,
+			options.enableRate,
+			options.enableMigrate,
 		)
 		return nil
 	}

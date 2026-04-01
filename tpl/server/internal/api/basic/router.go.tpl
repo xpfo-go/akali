@@ -33,8 +33,16 @@ func Register(cfg *config.Config, router *gin.Engine) {
 	// pprof
 	pprofRouter := router.Group("/debug/pprof")
 	if !cfg.Server.IsDebug {
+		username := cfg.Server.PprofUserName
+		if username == "" {
+			username = "admin"
+		}
+		password := cfg.Server.PprofPassword
+		if password == "" {
+			password = "admin"
+		}
 		pprofRouter.Use(gin.BasicAuth(gin.Accounts{
-			"admin": "admin",
+			username: password,
 		}))
 	}
 	{

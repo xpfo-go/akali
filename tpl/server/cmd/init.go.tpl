@@ -5,8 +5,11 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/xpfo-go/logs"
 	"<xpfo{ .ModulePath }xpfo>/internal/config"
-<xpfo{ if .EnableMySQL }xpfo>	"<xpfo{ .ModulePath }xpfo>/internal/database"
-<xpfo{ end }xpfo><xpfo{ if .EnableRedis }xpfo>	"<xpfo{ .ModulePath }xpfo>/internal/cache"
+<xpfo{ if .EnableMySQL }xpfo>
+	"<xpfo{ .ModulePath }xpfo>/internal/database"
+<xpfo{ end }xpfo>
+<xpfo{ if .EnableRedis }xpfo>
+	"<xpfo{ .ModulePath }xpfo>/internal/cache"
 <xpfo{ end }xpfo>
 )
 
