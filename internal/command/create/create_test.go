@@ -96,7 +96,8 @@ func TestCreateCommandGeneratesWithCustomModuleAndGoVersion(t *testing.T) {
 	if !strings.Contains(content, "module github.com/acme/demo") {
 		t.Fatalf("go.mod module mismatch, content=%q", content)
 	}
-	if !strings.Contains(content, "\ngo 1.22\n") {
+	normalized := strings.ReplaceAll(content, "\r\n", "\n")
+	if !strings.Contains(normalized, "\ngo 1.22\n") {
 		t.Fatalf("go.mod go version mismatch, content=%q", content)
 	}
 }
