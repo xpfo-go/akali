@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"<xpfo{ .ProjectName }xpfo>/internal/version"
+	"<xpfo{ .ModulePath }xpfo>/internal/version"
 	"strings"
 )
 

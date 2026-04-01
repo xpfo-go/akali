@@ -15,7 +15,7 @@ func Pwd() string {
 }
 
 func CreateFolder(dirPath string) error {
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(dirPath, 0o750); err != nil {
 		return fmt.Errorf("failed to create dir %s: %w", dirPath, err)
 	}
 	return nil
@@ -24,10 +24,11 @@ func CreateFolder(dirPath string) error {
 func CreateFile(dirPath string, filename string) (*os.File, error) {
 	filePath := filepath.Join(dirPath, filename)
 
-	if err := os.MkdirAll(dirPath, os.ModePerm); err != nil {
+	if err := os.MkdirAll(dirPath, 0o750); err != nil {
 		return nil, fmt.Errorf("failed to create dir %s: %w", dirPath, err)
 	}
-	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0o644)
+	// #nosec G304 -- filePath is built from scaffold-controlled template paths.
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_WRONLY|os.O_EXCL, 0o600)
 	if err != nil {
 		if errors.Is(err, os.ErrExist) {
 			return nil, fmt.Errorf("file already exists: %s", filePath)
@@ -36,14 +37,6 @@ func CreateFile(dirPath string, filename string) (*os.File, error) {
 	}
 
 	return file, nil
-}
-
-func ExecCommand(name string, args ...string) error {
-	cmd := exec.Command(name, args...) // 拼接参数与命令
-	if err := cmd.Run(); err != nil {  // 执行命令，若命令出错则打印错误到 stderr
-		return err
-	}
-	return nil
 }
 
 // GetSystemGoVersion 获取当前系统的go的版本号 out：1.21

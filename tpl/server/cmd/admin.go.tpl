@@ -7,12 +7,14 @@ import (
 	"github.com/xpfo-go/logs"
 	"os"
 	"os/signal"
-	"<xpfo{ .ProjectName }xpfo>/internal/api"
-	"<xpfo{ .ProjectName }xpfo>/internal/config"
-	"<xpfo{ .ProjectName }xpfo>/internal/server"
+	"<xpfo{ .ModulePath }xpfo>/internal/api"
+	"<xpfo{ .ModulePath }xpfo>/internal/config"
+	"<xpfo{ .ModulePath }xpfo>/internal/server"
 	"syscall"
 
+<xpfo{ if .EnableMySQL }xpfo>
 	_ "github.com/go-sql-driver/mysql"
+<xpfo{ end }xpfo>
 )
 
 func init() {
@@ -36,6 +38,8 @@ func Start(cmd *cobra.Command) {
 	initLogs()
 	// 初始化数据库
 	initDatabase()
+	// 初始化缓存
+	initRedis()
 
 	// 2. watch the signal
 	ctx, cancelFunc := context.WithCancel(context.Background())

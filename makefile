@@ -31,6 +31,10 @@ build-all: build-linux build-darwin build-windows
 test:
 	go test ./...
 
+.PHONY: test-e2e
+test-e2e:
+	go test -tags=e2e ./tests/e2e -count=1
+
 .PHONY: vet
 vet:
 	go vet ./...

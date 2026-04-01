@@ -3,7 +3,7 @@ package basic
 import (
 	"github.com/gin-gonic/gin"
 	"os"
-	"<xpfo{ .ProjectName }xpfo>/internal/version"
+	"<xpfo{ .ModulePath }xpfo>/internal/version"
 	"time"
 )
 

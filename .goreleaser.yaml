@@ -1,0 +1,43 @@
+version: 2
+
+project_name: akali
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: akali
+    main: .
+    binary: akali
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X github.com/xpfo-go/akali/internal/command/version.Version={{.Version}}
+      - -X github.com/xpfo-go/akali/internal/command/version.Commit={{.Commit}}
+      - -X github.com/xpfo-go/akali/internal/command/version.BuildTime={{.Date}}
+
+archives:
+  - id: default
+    formats: [tar.gz]
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - LICENSE
+      - README.md
+
+checksum:
+  name_template: "checksums.txt"
+
+changelog:
+  use: github

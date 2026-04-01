@@ -11,10 +11,24 @@ func TestGenServerTemplateFS(t *testing.T) {
 	err := GenServerTemplateFS(ServerTemplateFSData{
 		BasePath: base,
 		TplData: struct {
-			ProjectName string
-			ModulePath  string
-			GoVersion   string
-		}{ProjectName: "akali_gen_test", ModulePath: "akali_gen_test", GoVersion: "1.21"},
+			ProjectName   string
+			ModulePath    string
+			GoVersion     string
+			Profile       string
+			EnableMySQL   bool
+			EnableRedis   bool
+			EnableSwagger bool
+			EnableMetrics bool
+		}{
+			ProjectName:   "akali_gen_test",
+			ModulePath:    "akali_gen_test",
+			GoVersion:     "1.21",
+			Profile:       "full",
+			EnableMySQL:   true,
+			EnableRedis:   true,
+			EnableSwagger: true,
+			EnableMetrics: true,
+		},
 	})
 	if err != nil {
 		t.Fatalf("GenServerTemplateFS() error = %v", err)
@@ -36,10 +50,24 @@ func TestGenServerTemplateFS_ReturnsErrorWhenTargetExists(t *testing.T) {
 	data := ServerTemplateFSData{
 		BasePath: base,
 		TplData: struct {
-			ProjectName string
-			ModulePath  string
-			GoVersion   string
-		}{ProjectName: "akali_gen_test", ModulePath: "akali_gen_test", GoVersion: "1.21"},
+			ProjectName   string
+			ModulePath    string
+			GoVersion     string
+			Profile       string
+			EnableMySQL   bool
+			EnableRedis   bool
+			EnableSwagger bool
+			EnableMetrics bool
+		}{
+			ProjectName:   "akali_gen_test",
+			ModulePath:    "akali_gen_test",
+			GoVersion:     "1.21",
+			Profile:       "full",
+			EnableMySQL:   true,
+			EnableRedis:   true,
+			EnableSwagger: true,
+			EnableMetrics: true,
+		},
 	}
 	if err := GenServerTemplateFS(data); err != nil {
 		t.Fatalf("first generation failed: %v", err)

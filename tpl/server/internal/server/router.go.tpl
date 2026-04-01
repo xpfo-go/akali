@@ -2,8 +2,8 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"<xpfo{ .ProjectName }xpfo>/internal/config"
-	"<xpfo{ .ProjectName }xpfo>/internal/middleware"
+	"<xpfo{ .ModulePath }xpfo>/internal/config"
+	"<xpfo{ .ModulePath }xpfo>/internal/middleware"
 )
 
 // NewRouterFunc ...

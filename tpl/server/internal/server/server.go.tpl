@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/xpfo-go/logs"
 	"net/http"
-	"<xpfo{ .ProjectName }xpfo>/internal/config"
+	"<xpfo{ .ModulePath }xpfo>/internal/config"
 	"time"
 )
 

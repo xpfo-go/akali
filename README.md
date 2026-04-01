@@ -1,8 +1,7 @@
 # akali
 
-`akali` is a Go CLI scaffold tool for generating backend service projects.
-The generated project includes a practical baseline around Gin, sqlx, Swagger,
-logging, metrics, and common server wiring.
+`akali` is a Go CLI scaffold tool for generating backend service projects with
+production-oriented defaults.
 
 ## Install
 
@@ -19,60 +18,78 @@ go test ./...
 go run . --help
 ```
 
-## Commands
+## Create Command
 
 ```bash
-akali create [project-name]
-akali version
-akali --version
+akali create [project-name] [flags]
 ```
 
-Create command flags:
+Common usage:
 
 ```bash
-akali create demo-service \
-  --module github.com/your-org/demo-service \
+akali create order-service \
+  --output ./workspaces \
+  --module github.com/your-org/order-service \
   --go 1.22 \
-  --skip-tidy
+  --profile api
 ```
 
-- `--module`: set generated `go.mod` module path (default: project name)
-- `--go`: set generated Go version (default: local `go version`)
-- `--skip-tidy`: skip `go mod tidy` after scaffold generation
+### Profiles
+
+- `minimal`: HTTP baseline only (no MySQL, no Redis, no Swagger, no Metrics)
+- `api`: API-facing defaults (Swagger + Metrics, no MySQL/Redis)
+- `full`: full stack baseline (MySQL + Redis + Swagger + Metrics)
+
+### Flags
+
+- `--module`: set generated `go.mod` module path
+- `--go`: set generated Go version
+- `--profile`: `minimal | api | full`
+- `--with-mysql`: override profile default and enable/disable MySQL
+- `--with-redis`: override profile default and enable/disable Redis
+- `--with-swagger`: override profile default and enable/disable Swagger
+- `--with-metrics`: override profile default and enable/disable Metrics
+- `--output`: output directory for generated project
+- `--force`: overwrite existing target directory
+- `--skip-tidy`: skip `go mod tidy` after generation
+- `--dry-run`: preview generation without writing files
+
+Examples:
+
+```bash
+# preview without writing files
+akali create demo --profile minimal --dry-run
+
+# overwrite an existing target directory
+akali create demo --force --profile full
+
+# custom feature matrix on top of profile
+akali create demo --profile api --with-mysql --with-redis
+```
 
 ## Development
-
-Run checks locally:
 
 ```bash
 go test ./...
 go vet ./...
 go build ./...
+make test-e2e
 ```
 
-Cross-platform builds:
+## CI/CD
 
-```bash
-make build-all VERSION=v1.0.3
-```
+`akali` uses GitHub Actions for:
 
-## Generated Project Stack
+- cross-platform verification (`test`, `vet`, `build`) on Linux/macOS/Windows
+- `golangci-lint`
+- `gosec` + `govulncheck`
+- E2E scaffold generation tests
 
-- Gin
-- sqlx
-- Zap
-- Swagger (swaggo)
-- Prometheus metrics
+Tag-based release:
 
-## CI
-
-This repository uses GitHub Actions to run:
-
-- `go test ./...`
-- `go vet ./...`
-- `go build ./...`
-
-across Linux, macOS, and Windows.
+- push tag `vX.Y.Z`
+- GitHub Actions runs GoReleaser
+- multi-platform binaries and checksums are published to GitHub Releases
 
 ## License
 

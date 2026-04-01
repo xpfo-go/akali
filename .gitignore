@@ -30,3 +30,4 @@ worktrees/
 # local build outputs
 bin/
 dist/
+.tmpbin/

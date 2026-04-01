@@ -3,7 +3,7 @@ package main
 import (
 	_ "go.uber.org/automaxprocs"
 
-	"<xpfo{ .ProjectName }xpfo>/cmd"
+	"<xpfo{ .ModulePath }xpfo>/cmd"
 )
 
 func main() {

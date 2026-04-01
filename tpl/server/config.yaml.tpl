@@ -18,4 +18,12 @@ mysql:
     max_open_conn: 100
     max_idle_conn: 25
     conn_max_lifetime_second: 600
+<xpfo{ if .EnableRedis }xpfo>
 
+redis:
+    host: 127.0.0.1
+    port: 6379
+    password: ""
+    db: 0
+    pool_size: 20
+<xpfo{ end }xpfo>

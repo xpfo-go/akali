@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"<xpfo{ .ProjectName }xpfo>/internal/util"
+	"<xpfo{ .ModulePath }xpfo>/internal/util"
 	"time"
 
 	"github.com/jmoiron/sqlx"

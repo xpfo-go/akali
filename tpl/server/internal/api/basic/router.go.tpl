@@ -2,15 +2,20 @@ package basic
 
 import (
 	"github.com/gin-gonic/gin"
+<xpfo{ if .EnableMetrics }xpfo>
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+<xpfo{ end }xpfo><xpfo{ if .EnableSwagger }xpfo>
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+<xpfo{ end }xpfo>
 	"net/http"
 	"net/http/pprof"
-	"<xpfo{ .ProjectName }xpfo>/internal/config"
+	"<xpfo{ .ModulePath }xpfo>/internal/config"
 
-	_ "<xpfo{ .ProjectName }xpfo>/docs"
-	"<xpfo{ .ProjectName }xpfo>/internal/controller/basic"
+<xpfo{ if .EnableSwagger }xpfo>
+	_ "<xpfo{ .ModulePath }xpfo>/docs"
+<xpfo{ end }xpfo>
+	"<xpfo{ .ModulePath }xpfo>/internal/controller/basic"
 )
 
 func Register(cfg *config.Config, router *gin.Engine) {
@@ -19,9 +24,11 @@ func Register(cfg *config.Config, router *gin.Engine) {
 	router.GET("/health", basic.NewHealthHandleFunc(cfg))
 	router.GET("/version", basic.Version)
 
+<xpfo{ if .EnableMetrics }xpfo>
 	// metrics
 	metricRouter := router.Group("/metrics")
 	metricRouter.GET("", gin.WrapH(promhttp.Handler()))
+<xpfo{ end }xpfo>
 
 	// pprof
 	pprofRouter := router.Group("/debug/pprof")
@@ -45,11 +52,13 @@ func Register(cfg *config.Config, router *gin.Engine) {
 		pprofRouter.GET("/threadcreate", pprofHandler(pprof.Handler("threadcreate").ServeHTTP))
 	}
 
+<xpfo{ if .EnableSwagger }xpfo>
 	// swagger docs
 	if cfg.Server.IsDebug {
 		url := ginSwagger.URL("/swagger/doc.json")
 		router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 	}
+<xpfo{ end }xpfo>
 }
 
 func pprofHandler(h http.HandlerFunc) gin.HandlerFunc {
