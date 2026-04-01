@@ -121,6 +121,15 @@ func TestCreateProductionProfileE2E(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(generated, "docs")); !os.IsNotExist(err) {
 		t.Fatalf("production profile should disable swagger docs by default")
 	}
+	if _, err := os.Stat(filepath.Join(generated, ".github", "workflows", "ci.yml")); err != nil {
+		t.Fatalf("production profile should generate ci workflow: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(generated, "Dockerfile")); err != nil {
+		t.Fatalf("production profile should generate Dockerfile: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(generated, ".dockerignore")); err != nil {
+		t.Fatalf("production profile should generate .dockerignore: %v", err)
+	}
 
 	runCmd(t, generated, "go", "mod", "tidy")
 	runCmd(t, generated, "go", "test", "./...")

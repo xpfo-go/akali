@@ -11,7 +11,7 @@ import (
 	"github.com/xpfo-go/akali/internal/pkg/system"
 )
 
-//go:embed server
+//go:embed all:server
 var ServerTemplateFS embed.FS
 
 const (

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/jinzhu/configor"
 	"github.com/spf13/cobra"
 	"github.com/xpfo-go/logs"
@@ -13,33 +15,36 @@ import (
 <xpfo{ end }xpfo>
 )
 
-func initConfig(cmd *cobra.Command, key string) {
+func initConfig(cmd *cobra.Command, key string) error {
 	configFilePath, err := cmd.Flags().GetString(key)
-
 	if err != nil {
-		panic(err.Error())
+		return fmt.Errorf("read %s flag failed: %w", key, err)
 	}
 	if err := configor.Load(config.Configor, configFilePath); err != nil {
-		panic(err.Error())
+		return fmt.Errorf("load config failed: %w", err)
 	}
+	return nil
 }
 
-func initLogs() {
+func initLogs() error {
 	conf := logs.GetLogConf()
 	conf.FileName = config.Configor.Log.FileName
 	conf.MaxAge = config.Configor.Log.MaxAge
 	conf.Level = config.Configor.Log.Level
 	logs.InitLogSetting(conf)
+	return nil
 }
 
-func initDatabase() {
+func initDatabase() error {
 <xpfo{ if .EnableMySQL }xpfo>
-	database.InitDBClients(&config.Configor.Mysql)
+	return database.InitDBClients(&config.Configor.Mysql)
 <xpfo{ end }xpfo>
+	return nil
 }
 
-func initRedis() {
+func initRedis() error {
 <xpfo{ if .EnableRedis }xpfo>
-	cache.InitRedis(&config.Configor.Redis)
+	return cache.InitRedis(&config.Configor.Redis)
 <xpfo{ end }xpfo>
+	return nil
 }

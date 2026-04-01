@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"net/url"
-	"os"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/mysql"
@@ -20,34 +19,36 @@ var migrateCmd = &cobra.Command{
 var migrateUpCmd = &cobra.Command{
 	Use:   "up",
 	Short: "apply all up migrations",
-	Run: func(cmd *cobra.Command, args []string) {
-		initConfig(cmd, "config")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := initConfig(cmd, "config"); err != nil {
+			return err
+		}
 		m, err := newMigrator()
 		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			return err
 		}
 		if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			return err
 		}
+		return nil
 	},
 }
 
 var migrateDownCmd = &cobra.Command{
 	Use:   "down",
 	Short: "rollback one migration",
-	Run: func(cmd *cobra.Command, args []string) {
-		initConfig(cmd, "config")
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if err := initConfig(cmd, "config"); err != nil {
+			return err
+		}
 		m, err := newMigrator()
 		if err != nil {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			return err
 		}
 		if err := m.Steps(-1); err != nil && err != migrate.ErrNoChange {
-			fmt.Println(err.Error())
-			os.Exit(1)
+			return err
 		}
+		return nil
 	},
 }
 

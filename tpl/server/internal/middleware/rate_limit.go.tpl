@@ -18,6 +18,7 @@ type visitor struct {
 var (
 	visitors   = map[string]*visitor{}
 	visitorsMu sync.Mutex
+	cleanupOnce sync.Once
 )
 
 func getVisitor(ip string, r rate.Limit, burst int) *rate.Limiter {
@@ -35,8 +36,11 @@ func getVisitor(ip string, r rate.Limit, burst int) *rate.Limiter {
 }
 
 func cleanupVisitors() {
+	ticker := time.NewTicker(1 * time.Minute)
+	defer ticker.Stop()
+
 	for {
-		time.Sleep(1 * time.Minute)
+		<-ticker.C
 		visitorsMu.Lock()
 		for ip, v := range visitors {
 			if time.Since(v.lastSeen) > 5*time.Minute {
@@ -47,12 +51,21 @@ func cleanupVisitors() {
 	}
 }
 
-func RateLimit(cfg *config.Config) gin.HandlerFunc {
-	go cleanupVisitors()
+func startCleanupVisitors() {
+	cleanupOnce.Do(func() {
+		go runCleanupVisitors()
+	})
+}
 
+func runCleanupVisitors() {
+	cleanupVisitors()
+}
+
+func RateLimit(cfg *config.Config) gin.HandlerFunc {
 	if !cfg.RateLimit.Enabled {
 		return func(c *gin.Context) { c.Next() }
 	}
+	startCleanupVisitors()
 
 	rps := cfg.RateLimit.RPS
 	if rps <= 0 {

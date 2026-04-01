@@ -3,10 +3,12 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/xpfo-go/logs"
 	"net/http"
-	"<xpfo{ .ModulePath }xpfo>/internal/config"
+	"sync"
 	"time"
+
+	"github.com/xpfo-go/logs"
+	"<xpfo{ .ModulePath }xpfo>/internal/config"
 )
 
 const (
@@ -22,6 +24,7 @@ type Server struct {
 	addr     string
 	server   *http.Server
 	stopChan chan struct{}
+	stopOnce sync.Once
 	config   *config.Config
 }
 
@@ -67,8 +70,9 @@ func (s *Server) Run(ctx context.Context) {
 
 	go func() {
 		err := s.server.ListenAndServe()
-		if err != nil {
-			panic(err)
+		if err != nil && err != http.ErrServerClosed {
+			logs.Errorf("server listen failed: %v", err)
+			s.notifyStop()
 		}
 	}()
 
@@ -91,13 +95,21 @@ func (s *Server) Stop() {
 	s.server.SetKeepAlivesEnabled(false)
 	if err := s.server.Shutdown(ctx); err != nil {
 		logs.Error(err.Error())
-		s.server.Close()
+		if closeErr := s.server.Close(); closeErr != nil {
+			logs.Errorf("server close failed: %v", closeErr)
+		}
 	}
 
-	s.stopChan <- struct{}{}
+	s.notifyStop()
 }
 
 // Wait blocks until server is shut down.
 func (s *Server) Wait() {
 	<-s.stopChan
+}
+
+func (s *Server) notifyStop() {
+	s.stopOnce.Do(func() {
+		s.stopChan <- struct{}{}
+	})
 }

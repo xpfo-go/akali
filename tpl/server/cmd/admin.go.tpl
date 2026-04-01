@@ -2,15 +2,15 @@ package cmd
 
 import (
 	"context"
-	"fmt"
-	"github.com/spf13/cobra"
-	"github.com/xpfo-go/logs"
 	"os"
 	"os/signal"
+	"syscall"
+
+	"github.com/spf13/cobra"
+	"github.com/xpfo-go/logs"
 	"<xpfo{ .ModulePath }xpfo>/internal/api"
 	"<xpfo{ .ModulePath }xpfo>/internal/config"
 	"<xpfo{ .ModulePath }xpfo>/internal/server"
-	"syscall"
 
 <xpfo{ if .EnableMySQL }xpfo>
 	_ "github.com/go-sql-driver/mysql"
@@ -25,21 +25,29 @@ var rootCmd = &cobra.Command{
 	Use:   "<xpfo{ .ProjectName }xpfo>",
 	Short: "<xpfo{ .ProjectName }xpfo> Backend",
 	Long:  "<xpfo{ .ProjectName }xpfo> Backend, Code by Go",
-	Run: func(cmd *cobra.Command, args []string) {
-		Start(cmd)
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return Start(cmd)
 	},
 }
 
-func Start(cmd *cobra.Command) {
+func Start(cmd *cobra.Command) error {
 	// 1. init
 	// 初始化配置文件
-	initConfig(cmd, "config")
+	if err := initConfig(cmd, "config"); err != nil {
+		return err
+	}
 	// 初始化日志
-	initLogs()
+	if err := initLogs(); err != nil {
+		return err
+	}
 	// 初始化数据库
-	initDatabase()
+	if err := initDatabase(); err != nil {
+		return err
+	}
 	// 初始化缓存
-	initRedis()
+	if err := initRedis(); err != nil {
+		return err
+	}
 
 	// 2. watch the signal
 	ctx, cancelFunc := context.WithCancel(context.Background())
@@ -49,13 +57,11 @@ func Start(cmd *cobra.Command) {
 	go httpServer.Run(ctx)
 
 	interrupt(cancelFunc)
+	return nil
 }
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
 }
 
 func interrupt(onSignal func()) {

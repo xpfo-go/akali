@@ -40,6 +40,7 @@ akali create order-service \
 - `api`: API-facing defaults (Swagger + Metrics, no MySQL/Redis)
 - `full`: full stack baseline (MySQL + Redis + Swagger + Metrics)
 - `production`: production-hardened baseline (Auth + Rate Limit + Migration + MySQL + Redis + Metrics, Swagger disabled by default)
+  - generated project also includes: GitHub Actions CI, Dockerfile, `.dockerignore`, scaffold `README.md`
 
 ### Flags
 
@@ -91,6 +92,9 @@ make test-e2e
 - `golangci-lint`
 - `gosec` + `govulncheck`
 - E2E scaffold generation tests
+
+Generated projects also include a default CI workflow (`.github/workflows/ci.yml`) so
+new services have test/lint/security checks from day one.
 
 Tag-based release:
 

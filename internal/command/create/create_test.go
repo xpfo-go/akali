@@ -347,6 +347,18 @@ func TestCreateCommandProfileProductionEnablesHardeningModules(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(tmp, "demo", "docs")); !os.IsNotExist(err) {
 		t.Fatalf("production profile should disable swagger docs by default")
 	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", ".github", "workflows", "ci.yml")); err != nil {
+		t.Fatalf("production profile should generate ci workflow: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "Dockerfile")); err != nil {
+		t.Fatalf("production profile should generate Dockerfile: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", ".dockerignore")); err != nil {
+		t.Fatalf("production profile should generate .dockerignore: %v", err)
+	}
+	if _, err := os.Stat(filepath.Join(tmp, "demo", "README.md")); err != nil {
+		t.Fatalf("production profile should generate README.md: %v", err)
+	}
 
 	goModContent, err := os.ReadFile(filepath.Join(tmp, "demo", "go.mod"))
 	if err != nil {

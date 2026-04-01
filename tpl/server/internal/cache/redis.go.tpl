@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -12,9 +13,9 @@ import (
 
 var DefaultRedisClient *redis.Client
 
-func InitRedis(cfg *config.RedisConfig) {
+func InitRedis(cfg *config.RedisConfig) error {
 	if cfg == nil {
-		panic("redis config is nil")
+		return errors.New("redis config is nil")
 	}
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	client := redis.NewClient(&redis.Options{
@@ -28,9 +29,10 @@ func InitRedis(cfg *config.RedisConfig) {
 	defer cancel()
 
 	if err := client.Ping(ctx).Err(); err != nil {
-		panic(fmt.Errorf("redis ping failed for %s: %w", addr, err))
+		return fmt.Errorf("redis ping failed for %s: %w", addr, err)
 	}
 
 	DefaultRedisClient = client
 	logs.Infof("connect to redis: %s", addr)
+	return nil
 }
